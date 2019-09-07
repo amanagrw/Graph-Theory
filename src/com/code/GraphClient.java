@@ -1,5 +1,7 @@
 package com.code;
 
+import java.util.HashMap;
+
 public class GraphClient {
 
     public static void main(String[] args) {
@@ -29,6 +31,9 @@ public class GraphClient {
 
         graph.removeVertex("F");
         graph.display();
+
+        System.out.println(graph.hasPath("A","G"));
+        System.out.println(graph.bfs("A","G"));
 
 
     }

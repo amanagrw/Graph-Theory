@@ -2,6 +2,7 @@ package com.code;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Graph {
 
@@ -68,7 +69,6 @@ public class Graph {
         if(vtx1 == null || vtx2 == null || !vtx1.nbrs.containsKey(vname2)){
             return false;
         }
-
         return true;
     }
 
@@ -96,6 +96,91 @@ public class Graph {
         vtx1.nbrs.remove(vname2); //Remove C from nbrs of 2k
         vtx2.nbrs.remove(vname1); //Remove A from nbrs of 4k
 
+    }
+
+    public boolean hasPath(String vname1,String vname2){
+        return this.hasPath(vname1,vname2,new HashMap<>());
+    }
+
+    private boolean hasPath(String vname1, String vname2, HashMap<String, Boolean> processed){
+
+        processed.put(vname1,true);
+
+        //1.Check for direct edge
+        if(containsEdge(vname1, vname2))
+            return true;
+
+        Vertex vtx = vertices.get(vname1);
+
+        //2.Get neighbours
+        ArrayList<String> neighbours = new ArrayList<>(vtx.nbrs.keySet());
+
+        for(String nb : neighbours){
+            //3.Check if node is already processed to avoid stack overflow
+            if(!processed.containsKey(nb) && hasPath(nb,vname2,processed)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private class Pair{
+        //two properties to be added as one in the queue
+        String vname;
+        String psf; //path so far
+    }
+
+    public boolean bfs(String src, String dst){
+        HashMap<String,Boolean> processed = new HashMap<>();
+        LinkedList<Pair> queue = new LinkedList<>();
+
+        //Create a new pair
+        Pair sp = new Pair();
+        sp.vname = src;
+        sp.psf = src;
+
+        //put new pair in queue
+        queue.addLast(sp);
+
+        while(!queue.isEmpty()){
+
+            //remove pair
+            Pair rp = queue.removeFirst();
+
+            //so that if a vertex occurs multiple times then processing skips for second time onwards
+            if(processed.containsKey(rp.vname)){
+                continue;
+            }
+
+            //add it in processed Hashmap
+            processed.put(rp.vname,true);
+
+            //Check for direct edge
+            if(containsEdge(rp.vname,dst)) {
+                System.out.println(rp.psf + dst);
+                return true;
+            }
+
+            //Get neighbours list
+            Vertex rpvtx = vertices.get(rp.vname);
+            ArrayList<String> keys = new ArrayList<>(rpvtx.nbrs.keySet());
+
+            for(String key : keys){
+
+                //Process only unprocessed neighbours
+                if(!processed.containsKey(key)){
+
+                    //make a new pair of neighbour and put in queue
+                    Pair np = new Pair();
+                    np.vname = key;
+                    np.psf = rp.psf + key;
+
+                    queue.addLast(np);
+                }
+            }
+
+        }
+        return false;
     }
 
     public void display(){
